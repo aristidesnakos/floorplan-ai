@@ -5,7 +5,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "PDF Annotator",
+  title: "PDF Drawing Annotator",
   description: "Upload and annotate architectural PDF drawings",
 };
 
