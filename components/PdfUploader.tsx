@@ -25,8 +25,8 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onPdfUploaded }) => {
         // Generate a unique ID for the PDF
         const pdfId = generatePdfId(file.name);
 
-        // Store the PDF in local storage with metadata
-        storePdfInStorage(pdfId, base64Data, file.name, file.size);
+        // Store the PDF in storage with metadata
+        await storePdfInStorage(pdfId, base64Data, file.name, file.size);
 
         // Notify parent component
         onPdfUploaded(pdfId);

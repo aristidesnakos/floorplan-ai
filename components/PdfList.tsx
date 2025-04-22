@@ -27,31 +27,28 @@ export default function PdfList({ onSelectPdf, className = '' }: PdfListProps) {
   const [files, setFiles] = React.useState<UploadedFile[]>([]);
 
   React.useEffect(() => {
-    // Load the list of PDFs from local storage
-    const loadPdfFiles = () => {
-      const uploadedFiles = getUploadedFiles();
+    // Load the list of PDFs from storage
+    const loadPdfFiles = async () => {
+      const uploadedFiles = await getUploadedFiles();
       setFiles(uploadedFiles);
     };
 
     loadPdfFiles();
 
-    // Set up event listener for storage changes
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'pdf_files') {
-        loadPdfFiles();
-      }
-    };
+    // Set up a refresh interval to check for changes
+    const refreshInterval = setInterval(() => {
+      loadPdfFiles();
+    }, 3000); // Check every 3 seconds
 
-    window.addEventListener('storage', handleStorageChange);
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(refreshInterval);
     };
   }, []);
 
-  const handleDelete = (e: React.MouseEvent, pdfId: string) => {
+  const handleDelete = async (e: React.MouseEvent, pdfId: string) => {
     e.stopPropagation();
     if (confirm('Are you sure you want to delete this PDF?')) {
-      removePdfFromStorage(pdfId);
+      await removePdfFromStorage(pdfId);
       setFiles(prevFiles => prevFiles.filter(file => file.id !== pdfId));
     }
   };

@@ -1,82 +1,74 @@
 /**
- * Utility functions for handling PDF files in local storage
+ * Utility functions for handling PDF files in storage
+ * This file provides a compatibility layer that uses IndexedDB for storage
+ * but maintains the same API as the previous localStorage implementation
  */
 
-interface UploadedFile {
+import {
+  storePdfInDB,
+  getPdfFromDB,
+  getUploadedFilesFromDB,
+  removePdfFromDB
+} from './indexedDbUtils';
+
+export interface UploadedFile {
   id: string;
   name: string;
   size: number;
   uploadedAt: string;
 }
 
-// Store a PDF file in local storage
-export const storePdfInStorage = (pdfId: string, pdfData: string, fileName: string, fileSize: number): void => {
+// Store a PDF file in storage
+export const storePdfInStorage = async (pdfId: string, pdfData: string, fileName: string, fileSize: number): Promise<void> => {
   try {
-    // Store the PDF data
-    localStorage.setItem(`pdf_${pdfId}`, pdfData);
-
-    // Store file metadata
-    const fileMetadata: UploadedFile = {
-      id: pdfId,
-      name: fileName,
-      size: fileSize,
-      uploadedAt: new Date().toISOString()
-    };
-
-    // Update the list of stored PDFs
-    const storedFiles = getUploadedFiles();
-    const updatedFiles = [fileMetadata, ...storedFiles.filter(file => file.id !== pdfId)];
-    localStorage.setItem('pdf_files', JSON.stringify(updatedFiles));
+    // Use IndexedDB for storage
+    await storePdfInDB(pdfId, pdfData, fileName, fileSize);
   } catch (error) {
-    console.error('Error storing PDF in local storage:', error);
-    throw new Error('Failed to store PDF. The file might be too large for local storage.');
+    console.error('Error storing PDF in storage:', error);
+    throw new Error('Failed to store PDF. The file might be too large.');
   }
 };
 
-// Get a PDF file from local storage
-export const getPdfFromStorage = (pdfId: string): string | null => {
+// Get a PDF file from storage
+export const getPdfFromStorage = async (pdfId: string): Promise<string | null> => {
   try {
-    return localStorage.getItem(`pdf_${pdfId}`);
+    // Try IndexedDB first
+    return await getPdfFromDB(pdfId);
   } catch (error) {
-    console.error('Error retrieving PDF from local storage:', error);
+    console.error('Error retrieving PDF from storage:', error);
     return null;
   }
 };
 
 // Get a list of all stored PDFs with metadata
-export const getUploadedFiles = (): UploadedFile[] => {
+export const getUploadedFiles = async (): Promise<UploadedFile[]> => {
   try {
-    const filesJson = localStorage.getItem('pdf_files');
-    return filesJson ? JSON.parse(filesJson) : [];
+    // Get files from IndexedDB
+    return await getUploadedFilesFromDB();
   } catch (error) {
-    console.error('Error retrieving PDF files from local storage:', error);
+    console.error('Error retrieving PDF files from storage:', error);
     return [];
   }
 };
 
 // Get a list of all stored PDF IDs (for backward compatibility)
-export const getStoredPdfList = (): string[] => {
+export const getStoredPdfList = async (): Promise<string[]> => {
   try {
-    const files = getUploadedFiles();
+    const files = await getUploadedFiles();
     return files.map(file => file.id);
   } catch (error) {
-    console.error('Error retrieving PDF list from local storage:', error);
+    console.error('Error retrieving PDF list from storage:', error);
     return [];
   }
 };
 
-// Remove a PDF from local storage
-export const removePdfFromStorage = (pdfId: string): void => {
+// Remove a PDF from storage
+export const removePdfFromStorage = async (pdfId: string): Promise<void> => {
   try {
-    // Remove the PDF data
-    localStorage.removeItem(`pdf_${pdfId}`);
-
-    // Update the list of stored PDFs
-    const storedFiles = getUploadedFiles();
-    const updatedFiles = storedFiles.filter(file => file.id !== pdfId);
-    localStorage.setItem('pdf_files', JSON.stringify(updatedFiles));
+    // Remove from IndexedDB
+    await removePdfFromDB(pdfId);
   } catch (error) {
-    console.error('Error removing PDF from local storage:', error);
+    console.error('Error removing PDF from storage:', error);
   }
 };
 

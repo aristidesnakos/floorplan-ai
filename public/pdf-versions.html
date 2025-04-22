@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PDF.js Version Test</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .version { margin-bottom: 10px; }
+    .success { color: green; }
+    .error { color: red; }
+  </style>
+</head>
+<body>
+  <h1>PDF.js Version Test</h1>
+  <div id="results"></div>
+
+  <script>
+    // List of versions to test
+    const versions = [
+      '2.16.105',
+      '3.4.120',
+      '3.11.174',
+      '4.0.269'
+    ];
+
+    const resultsDiv = document.getElementById('results');
+
+    // Test each version
+    versions.forEach(version => {
+      const versionDiv = document.createElement('div');
+      versionDiv.className = 'version';
+      versionDiv.innerHTML = `Testing version ${version}: <span id="result-${version}">checking...</span>`;
+      resultsDiv.appendChild(versionDiv);
+
+      // Create a script element to test loading
+      const script = document.createElement('script');
+      script.src = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${version}/build/pdf.min.js`;
+      
+      script.onload = () => {
+        document.getElementById(`result-${version}`).className = 'success';
+        document.getElementById(`result-${version}`).textContent = 'SUCCESS';
+      };
+      
+      script.onerror = () => {
+        document.getElementById(`result-${version}`).className = 'error';
+        document.getElementById(`result-${version}`).textContent = 'ERROR - Not found';
+      };
+      
+      document.head.appendChild(script);
+    });
+  </script>
+</body>
+</html>

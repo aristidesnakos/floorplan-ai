@@ -27,8 +27,8 @@ const PdfUploadSection: React.FC<PdfUploadSectionProps> = ({
         // Generate a unique ID for the PDF
         const pdfId = generatePdfId(file.name);
 
-        // Store the PDF in local storage with metadata
-        storePdfInStorage(pdfId, base64Data, file.name, file.size);
+        // Store the PDF in storage with metadata
+        await storePdfInStorage(pdfId, base64Data, file.name, file.size);
 
         // Notify parent component
         onPdfUpload(pdfId);
@@ -51,7 +51,7 @@ const PdfUploadSection: React.FC<PdfUploadSectionProps> = ({
         <div className="text-center">
           <h2 className="text-2xl font-bold text-white mb-2">Upload Architectural PDF</h2>
           <p className="text-white/70 mb-6">Upload a PDF file to view and annotate</p>
-          
+
           <input
             ref={fileInputRef}
             type="file"
@@ -60,17 +60,17 @@ const PdfUploadSection: React.FC<PdfUploadSectionProps> = ({
             className="hidden"
             id="pdf-upload"
           />
-          
-          <button 
+
+          <button
             onClick={handleButtonClick}
             className="file-upload-button"
           >
             Choose File <span>No file chosen</span>
           </button>
-          
+
           <p className="file-size-text mt-4">Max file size: 10MB</p>
         </div>
-        
+
         <PdfList onSelectPdf={onPdfSelect} className="mt-8" />
       </div>
     </div>
